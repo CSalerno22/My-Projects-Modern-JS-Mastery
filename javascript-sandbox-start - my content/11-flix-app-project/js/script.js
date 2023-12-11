@@ -69,6 +69,9 @@ async function displayMovieDetails() {
 
 	const movie = await fetchAPIData(`movie/${movieId}`)
 
+	//Overlay for background
+	displayBackgroundImage('movie', movie.backdrop_path)
+
 	const div = document.createElement('div')
 
 	div.innerHTML = `<div class="details-top">
@@ -105,20 +108,44 @@ async function displayMovieDetails() {
         <div class="details-bottom">
           <h2>Movie Info</h2>
           <ul>
-            <li><span class="text-secondary">Budget:</span> $${
+            <li><span class="text-secondary">Budget:</span> $${addCommasToNumber(
 					movie.budget
-				}</li>
-            <li><span class="text-secondary">Revenue:</span> $${
+				)}</li>
+            <li><span class="text-secondary">Revenue:</span> $${addCommasToNumber(
 					movie.revenue
-				}</li>
-            <li><span class="text-secondary">Runtime:</span> 90 minutes</li>
-            <li><span class="text-secondary">Status:</span> Released</li>
+				)}</li>
+            <li><span class="text-secondary">Runtime:</span> ${
+					movie.runtime
+				} minutes</li>
+            <li><span class="text-secondary">Status:</span> ${movie.status}</li>
           </ul>
           <h4>Production Companies</h4>
-          <div class="list-group">Company 1, Company 2, Company 3</div>
+          <div class="list-group">${movie.production_companies
+					.map((company) => `<span>${company.name}</span>`)
+					.join(', ')}</div>
         </div>`
 
 	document.querySelector('#movie-details').appendChild(div)
+}
+
+//Backdrop for details page
+function displayBackgroundImage(type, backgroundPath) {
+	const overlayDiv = document.createElement('div')
+	overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/${backgroundPath})`
+	overlayDiv.style.backgroundSize = 'cover'
+	overlayDiv.style.backgroundPosition = 'center'
+	overlayDiv.style.backgroundRepeat = 'no-repeat'
+	overlayDiv.style.height = '100vh'
+	overlayDiv.style.width = '100vw'
+	overlayDiv.style.position = 'absolute'
+	overlayDiv.style.top = '0'
+	overlayDiv.style.left = '0'
+	overlayDiv.style.zIndex = '-1'
+	overlayDiv.style.opacity = '0.1'
+
+	if (type === 'movie') {
+		document.querySelector('#movie-details').appendChild(overlayDiv)
+	}
 }
 
 //Fetch data from TMDB API
@@ -155,6 +182,9 @@ function highlightActiveLink() {
 }
 
 //Add commas to the budget/revenue movite details
+function addCommasToNumber(number) {
+	return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 
 // Initialize App
 function init() {
